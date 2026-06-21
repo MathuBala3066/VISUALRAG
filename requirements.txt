@@ -1,0 +1,9 @@
+streamlit
+sentence-transformers
+psycopg2-binary
+pgvector
+openai
+python-dotenv
+pytesseract
+Pillow
+torch
