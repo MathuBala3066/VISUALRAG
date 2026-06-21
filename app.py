@@ -8,8 +8,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 
-# Tesseract Path
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+import pytesseract
 
 
 # ---------------------------
