@@ -51,17 +51,13 @@ def createEmbedding(texts):
     return model.encode(texts)
 
 
-# ---------------------------
-# PostgreSQL Connection
-# ---------------------------
 def connectDB():
-
     conn = psycopg2.connect(
-        host="localhost",
-        database="ragimage_db",
-        user="postgres",
-        password="Mathu@12345"
+        st.secrets["DATABASE_URL"]
     )
+
+    register_vector(conn)
+    return conn
 
     register_vector(conn)
 
