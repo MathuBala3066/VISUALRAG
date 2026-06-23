@@ -11,9 +11,6 @@ import os
 import pytesseract
 
 
-# ---------------------------
-# Load Embedding Model
-# ---------------------------
 @st.cache_resource
 def loadModel():
     return SentenceTransformer("all-MiniLM-L6-v2")
@@ -22,18 +19,11 @@ def loadModel():
 model = loadModel()
 
 
-# ---------------------------
-# OCR
-# ---------------------------
 def extractTextFromImage(uploadedFile):
     image = Image.open(uploadedFile)
     text = pytesseract.image_to_string(image)
     return text
 
-
-# ---------------------------
-# Chunk Text
-# ---------------------------
 def chunkText(text):
     chunks = []
     size = 500
@@ -44,9 +34,6 @@ def chunkText(text):
     return chunks
 
 
-# ---------------------------
-# Create Embedding
-# ---------------------------
 def createEmbedding(texts):
     return model.encode(texts)
 
@@ -59,14 +46,7 @@ def connectDB():
     register_vector(conn)
     return conn
 
-    register_vector(conn)
 
-    return conn
-
-
-# ---------------------------
-# Store Chunks
-# ---------------------------
 def replaceDocument(chunks, vectors):
 
     conn = connectDB()
@@ -97,9 +77,6 @@ def replaceDocument(chunks, vectors):
         conn.close()
 
 
-# ---------------------------
-# Retrieve Similar Chunks
-# ---------------------------
 def findRelatedVector(questionVector):
 
     conn = connectDB()
@@ -125,9 +102,6 @@ def findRelatedVector(questionVector):
         conn.close()
 
 
-# ---------------------------
-# OpenRouter
-# ---------------------------
 def initModel():
 
     load_dotenv()
@@ -145,16 +119,10 @@ def initModel():
 client = initModel()
 
 
-# ---------------------------
-# Prompt
-# ---------------------------
 def generatePrompt(context, question):
 
     prompt = f"""
 Answer the question only from the given context.
-
-If answer is not available say:
-"Answer not found"
 
 Context:
 {context}
@@ -166,9 +134,6 @@ Question:
     return prompt
 
 
-# ---------------------------
-# Streamlit UI
-# ---------------------------
 
 if "processed" not in st.session_state:
     st.session_state.processed = False
@@ -183,9 +148,6 @@ uploadedFile = st.file_uploader(
 )
 
 
-# ---------------------------
-# Upload Button
-# ---------------------------
 if st.button("Upload"):
 
     if uploadedFile is not None:
@@ -215,9 +177,6 @@ if st.button("Upload"):
         st.error("Upload an Image")
 
 
-# ---------------------------
-# Ask Question
-# ---------------------------
 if st.session_state.processed:
 
     question = st.text_input(

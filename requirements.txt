@@ -6,4 +6,4 @@ openai
 python-dotenv
 pytesseract
 Pillow
-torch
+torchS
