@@ -8,23 +8,29 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 
-import pytesseract
-
 
 @st.cache_resource
 def loadModel():
     return SentenceTransformer("all-MiniLM-L6-v2")
 
-
 model = loadModel()
 
 
-def extractTextFromImage(uploadedFile):
-    image = Image.open(uploadedFile)
-    text = pytesseract.image_to_string(image)
-    return text
+def connectDB():
+
+    conn = psycopg2.connect(
+        host="localhost",
+        database="rag_db",
+        user="postgres",
+        password="YOUR_PASSWORD"
+    )
+
+    register_vector(conn)
+
+    return conn
 
 def chunkText(text):
+
     chunks = []
     size = 500
 
@@ -34,17 +40,8 @@ def chunkText(text):
     return chunks
 
 
-def createEmbedding(texts):
-    return model.encode(texts)
-
-
-def connectDB():
-    conn = psycopg2.connect(
-        st.secrets["DATABASE_URL"]
-    )
-
-    register_vector(conn)
-    return conn
+def createEmbedding(data):
+    return model.encode(data)
 
 
 def replaceDocument(chunks, vectors):
@@ -115,49 +112,53 @@ def initModel():
 
     return client
 
-
 client = initModel()
 
 
 def generatePrompt(context, question):
 
-    prompt = f"""
-Answer the question only from the given context.
+    return f"""
+Answer the question only based on the given context.
+
 
 Context:
 {context}
 
 Question:
 {question}
-
 """
-
-    return prompt
-
 
 
 if "processed" not in st.session_state:
     st.session_state.processed = False
 
 
-st.title("VISUALRAG")
+st.title("Multi Image OCR RAG System")
 
-
-uploadedFile = st.file_uploader(
-    "Upload Image",
-    type=["png", "jpg", "jpeg"]
+uploadedFiles = st.file_uploader(
+    "Upload Images",
+    type=["png", "jpg", "jpeg"],
+    accept_multiple_files=True
 )
 
 
 if st.button("Upload"):
 
-    if uploadedFile is not None:
+    if uploadedFiles:
 
         try:
 
-            text = extractTextFromImage(uploadedFile)
+            all_text = ""
 
-            chunks = chunkText(text)
+            for uploadedFile in uploadedFiles:
+
+                image = Image.open(uploadedFile)
+
+                text = pytesseract.image_to_string(image)
+
+                all_text += text + "\n"
+
+            chunks = chunkText(all_text)
 
             vectors = createEmbedding(chunks)
 
@@ -166,7 +167,7 @@ if st.button("Upload"):
             st.session_state.processed = True
 
             st.success(
-                "Image Processed Successfully"
+                f"{len(uploadedFiles)} Images Processed Successfully"
             )
 
         except Exception as e:
@@ -175,13 +176,13 @@ if st.button("Upload"):
 
     else:
 
-        st.error("Upload an Image")
+        st.error("Upload Images")
 
 
 if st.session_state.processed:
 
     question = st.text_input(
-        "Ask Question About Image"
+        "Ask Question About Uploaded Images"
     )
 
     if st.button("Ask"):
@@ -204,7 +205,7 @@ if st.session_state.processed:
             try:
 
                 response = client.chat.completions.create(
-                    model="openrouter/free",
+                    model="openai/gpt-3.5-turbo",
                     messages=[
                         {
                             "role": "user",
@@ -213,8 +214,11 @@ if st.session_state.processed:
                     ]
                 )
 
+                st.subheader("Answer")
+
                 st.success(
-                    response.choices[0].message.content
+                    response.choices[0]
+                    .message.content
                 )
 
             except Exception as e:
