@@ -18,15 +18,13 @@ model = loadModel()
 
 def connectDB():
 
-    conn = psycopg2.connect(
-        host="localhost",
-        database="rag_db",
-        user="postgres",
-        password="YOUR_PASSWORD"
-    )
+    import os
+    import psycopg2
 
+    DATABASE_URL = os.getenv("DATABASE_URL")
+
+    conn = psycopg2.connect(DATABASE_URL)
     register_vector(conn)
-
     return conn
 
 def chunkText(text):
