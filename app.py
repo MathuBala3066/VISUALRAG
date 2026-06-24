@@ -131,7 +131,7 @@ if "processed" not in st.session_state:
     st.session_state.processed = False
 
 
-st.title("Multi Image OCR RAG System")
+st.title("VISUALRAG")
 
 uploadedFiles = st.file_uploader(
     "Upload Images",
