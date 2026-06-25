@@ -1,4 +1,5 @@
 streamlit
+pillow
 sentence-transformers
 psycopg2-binary
 pgvector
