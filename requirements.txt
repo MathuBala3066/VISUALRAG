@@ -6,4 +6,3 @@ pgvector
 openai
 python-dotenv
 pytesseract
-Pillow
